@@ -1,0 +1,17 @@
+# requirements.txt
+# Dependencies to run train_mobilenetv3.py and related scripts
+
+# Core dependencies
+torch==2.6.0
+torchvision==0.21.0
+
+
+# For data handling and transforms
+numpy==1.25.2
+matplotlib>=3.5
+pandas
+
+# For efficientDet-Lite0
+timm
+
+
