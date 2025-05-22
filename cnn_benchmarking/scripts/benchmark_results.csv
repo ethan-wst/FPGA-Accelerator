@@ -1,5 +1,0 @@
-Model,Input Size,Batch Size,Avg Inference Time (ms)
-mobilenet_v2,256,1,8.46
-mobilenet_v3_large,256,1,9.05
-mobilenet_v3_small,256,1,4.80
-efficientnet_lite0,256,1,9.18

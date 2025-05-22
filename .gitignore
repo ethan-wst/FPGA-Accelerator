@@ -1,1 +1,42 @@
-.venv
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VSCode settings
+.vscode/
+
+# Python virtual environments
+.venv/
+venv/
+ENV/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test, log, and cache files
+*.log
+*.tmp
+*.bak
+*.cache/
+
+# Large datasets and outputs
+cnn_benchmarking/imagenet/
+cnn_benchmarking/benchmark_results/*.png
+
+# Ignore ImageNet and subsets (do not track images)
+cnn_benchmarking/imagenet/imagenet_subset/
+cnn_benchmarking/imagenet/ILSVRC2012_devkit_t12/data/*.JPEG
+cnn_benchmarking/imagenet/ILSVRC2012_devkit_t12/data/*.tar
+
+# Ignore CSV results if desired (uncomment if you don't want to track results)
+# cnn_benchmarking/benchmark_results/*.csv
+
+# Ignore any other large or user-specific files
+*.zip
+*.7z
+*.tar.gz

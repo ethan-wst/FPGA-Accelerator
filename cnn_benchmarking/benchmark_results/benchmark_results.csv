@@ -1,0 +1,4 @@
+efficientnet_lite0,256,10.86,85.00,94.00
+mobilenet_v2,256,9.11,64.00,85.00
+mobilenet_v3_small,256,5.42,66.00,89.00
+mobilenet_v3_large,256,9.54,75.00,92.00

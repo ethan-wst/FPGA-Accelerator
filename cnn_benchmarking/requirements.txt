@@ -13,5 +13,5 @@ pandas
 
 # For efficientDet-Lite0
 timm
-
+scipy
 
