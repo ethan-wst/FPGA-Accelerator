@@ -16,7 +16,7 @@ scripts_and_models = [
     ]),
     # EfficientNetV2
     ('efficientnet-v2_benchmark.py', [
-        'efficientnet_v2_s', 'efficientnet_v2_m', 'efficientnet_v2_l'
+        'efficientnet_v2_s', 'efficientnet_v2_m'
     ]),
     # EfficientNet-Lite
     ('efficientnet-lite_benchmark.py', [

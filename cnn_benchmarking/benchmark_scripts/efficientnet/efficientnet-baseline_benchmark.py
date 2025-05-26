@@ -14,7 +14,6 @@ import os
 import random
 from PIL import Image
 from torchvision import transforms
-import scipy.io as sio
 import json
 
 # --- Argument Parser ---
@@ -46,11 +45,6 @@ weights = weights_map[args.model]
 model = getattr(models, args.model)(weights=weights)
 model.eval()
 model.to(device)
-
-# --- Load WNID to class index mapping ---
-meta = sio.loadmat(args.meta)
-wnids = [str(x[0]) for x in meta['synsets']['WNID'][0]]
-wnid_to_idx = {wnid: i for i, wnid in enumerate(wnids)}
 
 # --- Build WNID to model class index mapping (for accuracy) ---
 with open(os.path.join(os.path.dirname(__file__), '../../imagenet/imagenet_class_index.json'), 'r') as f:

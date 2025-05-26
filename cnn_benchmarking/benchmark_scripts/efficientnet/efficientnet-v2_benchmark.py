@@ -11,7 +11,6 @@ import os
 import random
 from PIL import Image
 from torchvision import transforms
-import scipy.io as sio
 import json
 
 # --- Argument Parser ---
