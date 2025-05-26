@@ -25,11 +25,11 @@ Thumbs.db
 *.cache/
 
 # Large datasets and outputs
-cnn_benchmarking/imagenet/
 cnn_benchmarking/benchmark_results/*.png
 
 # Ignore ImageNet and subsets (do not track images)
 cnn_benchmarking/imagenet/imagenet_subset/
+cnn_benchmarking/imagenet/ILSVRC2012_devkit_t12
 cnn_benchmarking/imagenet/ILSVRC2012_devkit_t12/data/*.JPEG
 cnn_benchmarking/imagenet/ILSVRC2012_devkit_t12/data/*.tar
 
