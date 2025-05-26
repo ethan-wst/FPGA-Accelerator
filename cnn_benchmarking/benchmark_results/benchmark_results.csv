@@ -1,4 +1,18 @@
-efficientnet_lite0,256,10.86,85.00,94.00
-mobilenet_v2,256,9.11,64.00,85.00
-mobilenet_v3_small,256,5.42,66.00,89.00
-mobilenet_v3_large,256,9.54,75.00,92.00
+Device, Model, Input Size, Avg Inference Time (ms), Top-1 Accuracy (%), Top-5 Accuracy (%), Total Size (MB)
+cpu,efficientnet_b0,224x224,10.40,76.80,91.60,20.17
+cpu,efficientnet_b1,224x224,14.29,76.60,93.40,29.73
+cpu,efficientnet_b2,224x224,14.53,77.60,92.60,34.75
+cpu,efficientnet_b3,224x224,18.18,77.40,93.40,46.67
+cpu,efficientnet_b4,224x224,23.25,75.60,92.20,73.78
+cpu,efficientnet_b5,224x224,34.12,71.00,87.80,115.93
+cpu,efficientnet_b6,224x224,45.58,73.00,92.00,164.19
+cpu,efficientnet_b7,224x224,58.89,70.60,89.60,253.10
+cpu,efficientnet_v2_s,384,52.25,86.00,96.80,81.86
+cpu,efficientnet_v2_m,480,127.74,85.60,96.60,206.53
+cpu,efficientnet_lite0,224,8.53,76.40,92.80,17.75
+cpu,efficientnet_es,224,12.67,77.80,94.00,20.75
+cpu,efficientnet_em,240,18.23,82.80,95.00,26.32
+cpu,efficientnet_el,300,33.66,82.60,96.20,40.40
+cpu,mobilenet_v2,224,7.36,72.40,90.00,13.37
+cpu,mobilenet_v3_small,224,4.21,69.80,89.20,9.70
+cpu,mobilenet_v3_large,224,7.87,76.00,91.00,20.92

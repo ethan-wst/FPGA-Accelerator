@@ -1,10 +1,9 @@
-# MobileNetV3 Inference Benchmark Script
-# Goal: Evaluate inference performance of pretrained MobileNetV3 models on dummy input
-#       This script avoids dataset training to isolate hardware speed performance
+# mobilenetv2_benchmark.py
+# Benchmark pretrained MobileNetV2 on random images from ImageNet_SubSet to measure inference speed and top-1/top-5 accuracy
 
 import torch
 import torchvision.models as models
-from torchvision.models import MobileNet_V3_Small_Weights, MobileNet_V3_Large_Weights
+from torchvision.models import MobileNet_V2_Weights
 import argparse
 import time
 import csv
@@ -12,40 +11,28 @@ import os
 import random
 from PIL import Image
 from torchvision import transforms
-import scipy.io as sio
 import json
 
 # --- Argument Parser ---
-parser = argparse.ArgumentParser(description='Benchmark MobileNetV3 inference speed')
-parser.add_argument('--model', type=str, default='mobilenet_v3_small', help='Model type (mobilenet_v3_small or mobilenet_v3_large)')
-parser.add_argument('--input_size', type=int, default=256, help='Height/width of input tensor')
-parser.add_argument('--imagenet_dir', type=str, default='../imagenet/imagenet_subset', help='Path to ImageNet_SubSet directory')
-parser.add_argument('--num_images', type=int, default=100, help='Number of random images to use for benchmarking')
-parser.add_argument('--meta', type=str, default='../imagenet/ILSVRC2012_devkit_t12/data/meta.mat', help='Path to meta.mat for WNID mapping')
+parser = argparse.ArgumentParser(description='Benchmark MobileNetV2 inference speed and accuracy')
+parser.add_argument('--model', type=str, default='mobilenet_v2', help='Model name: mobilenet_v2')
+parser.add_argument('--imagenet_dir', type=str, default=os.path.abspath(os.path.join(os.path.dirname(__file__), '../../imagenet/imagenet_subset')), help='Path to ImageNet_SubSet directory')
+parser.add_argument('--num_images', type=int, default=500, help='Number of random images to use for benchmarking')
 args = parser.parse_args()
 
 # --- Device Setup ---
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Running on: {device}")
 
-# --- Load Model ---
-if args.model == 'mobilenet_v3_large':
-    weights = MobileNet_V3_Large_Weights.DEFAULT
-    model = models.mobilenet_v3_large(weights=weights)
-else:
-    weights = MobileNet_V3_Small_Weights.DEFAULT
-    model = models.mobilenet_v3_small(weights=weights)
+# --- Load Model and Input Size ---
+weights = MobileNet_V2_Weights.DEFAULT
+model = models.mobilenet_v2(weights=weights)
+model.eval()
+model.to(device)
+input_size = weights.transforms().crop_size[0] if hasattr(weights, 'transforms') and hasattr(weights.transforms(), 'crop_size') else 224
 
-model.eval()    # Puts model into inference mode
-model.to(device)    # Moves the model to selected device
-
-# --- Load WNID to class index mapping ---
-meta = sio.loadmat(args.meta)
-wnids = [str(x[0]) for x in meta['synsets']['WNID'][0]]
-wnid_to_idx = {wnid: i for i, wnid in enumerate(wnids)}
-
-# --- Build WNID to model class index mapping (for accuracy) ---
-with open(os.path.join(os.path.dirname(__file__), '../imagenet/imagenet_class_index.json'), 'r') as f:
+# --- Load WNID to model class index mapping (for accuracy) ---
+with open(os.path.join(os.path.dirname(__file__), '../../imagenet/imagenet_class_index.json'), 'r') as f:
     class_idx = json.load(f)
 wnid_to_model_idx = {v[0]: int(k) for k, v in class_idx.items()}
 
@@ -69,8 +56,8 @@ else:
 
 # --- Preprocessing ---
 preprocess = transforms.Compose([
-    transforms.Resize(args.input_size),
-    transforms.CenterCrop(args.input_size),
+    transforms.Resize(input_size),
+    transforms.CenterCrop(input_size),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
@@ -107,19 +94,23 @@ avg_time = sum(times) / len(times) * 1000 if times else 0  # ms/image
 accuracy = correct / total * 100 if total > 0 else 0
 top5_accuracy = top5_correct / total * 100 if total > 0 else 0
 
-print(f"Model: MobileNetV3")
-print(f"Input Size: {args.input_size}x{args.input_size}")
+total_params = sum(param.numel() for param in model.parameters())
+total_size_bytes = total_params * 4  # float32
+total_size_mb = total_size_bytes / 1024 / 1024
+
+print(f"Model: {args.model}")
+print(f"Input Size: {input_size}x{input_size}")
 print(f"Average Inference Time: {avg_time:.2f} ms/image over {total} images")
 print(f"Top-1 Accuracy: {accuracy:.2f}%")
 print(f"Top-5 Accuracy: {top5_accuracy:.2f}%")
+print(f"Total size in MB: {total_size_mb:.2f}")
 
 # --- Data Export ---
-csv_path = "../benchmark_results/benchmark_results.csv"
+csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../benchmark_results/benchmark_results.csv'))
 write_header = not os.path.exists(csv_path)
 
 with open(csv_path, mode="a", newline="") as file:
     writer = csv.writer(file)
     if write_header:
-        writer.writerow(["Model", "Input Size", "Avg Inference Time (ms)", "Top-1 Accuracy (%)", "Top-5 Accuracy (%)"])
-    writer.writerow([args.model, args.input_size, f"{avg_time:.2f}", f"{accuracy:.2f}", f"{top5_accuracy:.2f}"])
-
+        writer.writerow(["Device", "Model", "Input Size", "Avg Inference Time (ms)", "Top-1 Accuracy (%)", "Top-5 Accuracy (%)", "Total Size (MB)"])
+    writer.writerow([device, args.model, input_size, f"{avg_time:.2f}", f"{accuracy:.2f}", f"{top5_accuracy:.2f}", f"{total_size_mb:.2f}"])

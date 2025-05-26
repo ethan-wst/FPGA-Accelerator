@@ -13,5 +13,10 @@ pandas
 
 # For efficientDet-Lite0
 timm
+
+# For parsing and configuration
 scipy
+
+# For Yolo models
+ultralytics
 
