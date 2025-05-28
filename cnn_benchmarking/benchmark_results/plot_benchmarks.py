@@ -91,6 +91,9 @@ def plot_bubble_map(device_df, device_name):
     plt.ylabel("Top-1 Accuracy (%)")
     plt.title(f"CNN Models on {device_name.upper()}: Inference Time vs. Top-1 Accuracy (Bubble Size = Model Size MB)")
     
+    # Set consistent y-axis range from 65% to 100%
+    plt.ylim(65, 100)
+
     # Custom legend for model colors
     handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color_map[m], 
                          markersize=10, label=m) for m in device_df['Model']]

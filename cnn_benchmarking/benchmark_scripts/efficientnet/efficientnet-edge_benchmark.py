@@ -53,11 +53,9 @@ for wnid in os.listdir(args.imagenet_dir):
             image_paths.append(os.path.join(wnid_dir, fname))
             gt_wnids.append(wnid)
 
-# --- Randomly sample images ---
-if args.num_images < len(image_paths):
-    sampled = random.sample(list(zip(image_paths, gt_wnids)), args.num_images)
-else:
-    sampled = list(zip(image_paths, gt_wnids))
+# --- Collect Sample Images ---
+sampled = list(zip(image_paths, gt_wnids))
+print(f"Running inference on all {len(sampled)} available images")
 
 # --- Preprocessing ---
 preprocess = transforms.Compose([

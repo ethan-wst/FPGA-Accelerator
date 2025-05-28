@@ -4,8 +4,7 @@
 import torch
 import torchvision.models as models
 from torchvision.models import (
-    EfficientNet_B0_Weights, EfficientNet_B1_Weights, EfficientNet_B2_Weights, EfficientNet_B3_Weights,
-    EfficientNet_B4_Weights, EfficientNet_B5_Weights, EfficientNet_B6_Weights, EfficientNet_B7_Weights
+    EfficientNet_B0_Weights, EfficientNet_B1_Weights, EfficientNet_B2_Weights
 )
 import argparse
 import time
@@ -32,12 +31,7 @@ print(f"Running on: {device}")
 weights_map = {
     'efficientnet_b0': EfficientNet_B0_Weights.DEFAULT,
     'efficientnet_b1': EfficientNet_B1_Weights.DEFAULT,
-    'efficientnet_b2': EfficientNet_B2_Weights.DEFAULT,
-    'efficientnet_b3': EfficientNet_B3_Weights.DEFAULT,
-    'efficientnet_b4': EfficientNet_B4_Weights.DEFAULT,
-    'efficientnet_b5': EfficientNet_B5_Weights.DEFAULT,
-    'efficientnet_b6': EfficientNet_B6_Weights.DEFAULT,
-    'efficientnet_b7': EfficientNet_B7_Weights.DEFAULT,
+    'efficientnet_b2': EfficientNet_B2_Weights.DEFAULT
 }
 if args.model not in weights_map:
     raise ValueError(f"Unknown model: {args.model}")
@@ -63,11 +57,9 @@ for wnid in os.listdir(args.imagenet_dir):
             image_paths.append(os.path.join(wnid_dir, fname))
             gt_wnids.append(wnid)
 
-# --- Randomly sample images ---
-if args.num_images < len(image_paths):
-    sampled = random.sample(list(zip(image_paths, gt_wnids)), args.num_images)
-else:
-    sampled = list(zip(image_paths, gt_wnids))
+# --- Collect Sample Images ---
+sampled = list(zip(image_paths, gt_wnids))
+print(f"Running inference on all {len(sampled)} available images")
 
 # --- Determine model's preferred input size ---
 if hasattr(model, 'default_cfg') and 'input_size' in model.default_cfg:
