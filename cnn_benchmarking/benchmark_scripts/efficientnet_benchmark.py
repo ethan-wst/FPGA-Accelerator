@@ -10,17 +10,17 @@ SCRIPT_DIR = os.path.join(os.path.dirname(__file__), 'efficientnet')
 # List of scripts and their model arguments
 scripts_and_models = [
     # Baseline EfficientNet-B0 to B7
-    ('efficientnet-baseline_benchmark.py', [
-        'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2'
-    ]),
+    # ('efficientnet-baseline_benchmark.py', [
+    #     'efficientnet_b0', 'efficientnet_b1', 'efficientnet_b2'
+    # ]),
     # EfficientNet-Lite
     ('efficientnet-lite_benchmark.py', [
         'efficientnet_lite0'
     ]),
     # EfficientNet-Edge
-    ('efficientnet-edge_benchmark.py', [
-        'efficientnet_es', 'efficientnet_em'
-    ]),
+    # ('efficientnet-edge_benchmark.py', [
+    #     'efficientnet_es', 'efficientnet_em'
+    # ]),
 ]
 
 for script, models in scripts_and_models:
