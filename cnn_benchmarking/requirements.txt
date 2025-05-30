@@ -20,3 +20,12 @@ scipy
 # For Yolo models
 ultralytics
 
+# ONNX Runtime for inference
+onnxruntime
+onnxruntime-gpu
+onnx
+
+requests
+pillow
+
+
