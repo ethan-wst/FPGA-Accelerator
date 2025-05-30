@@ -27,5 +27,6 @@ onnx
 
 requests
 pillow
+seaborn
 
 

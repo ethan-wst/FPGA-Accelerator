@@ -51,10 +51,8 @@ if not os.path.exists(model_path):
     
 # Get model size
 model_size_mb = os.path.getsize(model_path) / (1024 * 1024)
-print(f"ONNX model size: {model_size_mb:.2f} MB")
 
 # --- Create ONNX Inference Session ---
-print(f"Loading model from: {model_path}")
 session_options = ort.SessionOptions()
 session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
 session = ort.InferenceSession(model_path, sess_options=session_options, providers=providers)
@@ -69,8 +67,6 @@ if len(input_shape) == 4:  # NCHW format
         height, width = 224, 224
 else:
     height, width = 224, 224  # Default to standard size if shape is dynamic
-
-print(f"Input shape: {input_shape}, using size: {height}x{width}")
 
 # --- Load WNID to model class index mapping (for accuracy) ---
 with open(os.path.join(os.path.dirname(__file__), '../../imagenet/imagenet_class_index.json'), 'r') as f:

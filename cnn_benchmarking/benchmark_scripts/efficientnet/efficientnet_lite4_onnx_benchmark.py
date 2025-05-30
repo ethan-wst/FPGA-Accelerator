@@ -9,7 +9,7 @@ import csv
 import os
 import json
 from PIL import Image
-from torchvision import transforms
+import cv2
 import warnings
 
 # Suppress warnings
@@ -51,10 +51,8 @@ if not os.path.exists(model_path):
     
 # Get model size
 model_size_mb = os.path.getsize(model_path) / (1024 * 1024)
-print(f"ONNX model size: {model_size_mb:.2f} MB")
 
 # --- Create ONNX Inference Session ---
-print(f"Loading model from: {model_path}")
 session_options = ort.SessionOptions()
 session_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
 session = ort.InferenceSession(model_path, sess_options=session_options, providers=providers)
@@ -63,14 +61,44 @@ session = ort.InferenceSession(model_path, sess_options=session_options, provide
 inputs = session.get_inputs()
 input_name = inputs[0].name
 input_shape = inputs[0].shape
-if len(input_shape) == 4:  # NCHW format
-    _, _, height, width = input_shape
-    if height is None or width is None:  # Handle dynamic shapes
-        height, width = 224, 224
-else:
-    height, width = 224, 224  # Default to standard size if shape is dynamic
 
-print(f"Input shape: {input_shape}, using size: {height}x{width}")
+# For EfficientNet-Lite models, use fixed size 224x224
+height, width = 224, 224
+
+# --- EfficientNet specific preprocessing functions ---
+def resize_with_aspectratio(img, out_height, out_width, scale=87.5, inter_pol=cv2.INTER_LINEAR):
+    height, width, _ = img.shape
+    new_height = int(100. * out_height / scale)
+    new_width = int(100. * out_width / scale)
+    if height > width:
+        w = new_width
+        h = int(new_height * height / width)
+    else:
+        h = new_height
+        w = int(new_width * width / height)
+    img = cv2.resize(img, (w, h), interpolation=inter_pol)
+    return img
+
+def center_crop(img, out_height, out_width):
+    height, width, _ = img.shape
+    left = int((width - out_width) / 2)
+    right = int((width + out_width) / 2)
+    top = int((height - out_height) / 2)
+    bottom = int((height + out_height) / 2)
+    img = img[top:bottom, left:right]
+    return img
+
+def pre_process_image(img_path, dims):
+    img = cv2.imread(img_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    output_height, output_width, _ = dims
+    img = resize_with_aspectratio(img, output_height, output_width, inter_pol=cv2.INTER_LINEAR)
+    img = center_crop(img, output_height, output_width)
+    img = np.asarray(img, dtype='float32')
+    # standard normalization for EfficientNet
+    img -= [127.0, 127.0, 127.0]
+    img /= [128.0, 128.0, 128.0]
+    return img
 
 # --- Load WNID to model class index mapping (for accuracy) ---
 with open(os.path.join(os.path.dirname(__file__), '../../imagenet/imagenet_class_index.json'), 'r') as f:
@@ -93,14 +121,6 @@ for wnid in os.listdir(args.imagenet_dir):
 sampled = list(zip(image_paths, gt_wnids))
 print(f"Running inference on all {len(sampled)} available images")
 
-# --- Preprocessing ---
-preprocess = transforms.Compose([
-    transforms.Resize((height, width)),
-    transforms.CenterCrop((height, width)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-])
-
 # --- Benchmark and Accuracy ---
 times = []
 correct = 0
@@ -112,8 +132,17 @@ output_name = session.get_outputs()[0].name
 
 for img_path, wnid in sampled:
     try:
-        img = Image.open(img_path).convert('RGB')
-        input_tensor = preprocess(img).unsqueeze(0).numpy()  # Convert to numpy for ONNX
+        # Use the EfficientNet-specific preprocessing
+        input_data = pre_process_image(img_path, (height, width, 3))
+        
+        # The model expects NHWC format (TensorFlow style) for EfficientNet-Lite
+        # Check if we need to transpose
+        if len(input_shape) == 4 and input_shape[1] == 3:  # NCHW format
+            # Need to convert NHWC to NCHW
+            input_data = np.transpose(input_data, (2, 0, 1))
+            
+        # Add batch dimension
+        input_tensor = np.expand_dims(input_data, axis=0).astype(np.float32)
         
         # Run inference
         start = time.time()
