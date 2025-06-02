@@ -5,6 +5,7 @@ import subprocess
 import sys
 import os
 import glob
+import argparse
 
 SCRIPT_DIR = os.path.dirname(__file__)
 PYTORCH_DIR = os.path.join(SCRIPT_DIR, 'pytorch')
@@ -20,8 +21,19 @@ script_model_map = {
     'resnet50_benchmark.py': ['resnet50', 'resnet50_quant'],
 }
 
+# Parse arguments
+parser = argparse.ArgumentParser(description='Run all PyTorch benchmarks')
+parser.add_argument('--device', type=str, default='cpu', choices=['cpu', 'cuda', 'all'],
+                   help='Device to run benchmarks on (cpu, cuda, or all)')
+parser.add_argument('--skip_quant', action='store_true',
+                   help='Skip quantized models (only run standard models)')
+args = parser.parse_args()
+
 # Devices to benchmark on
-devices = ['cpu', 'cuda']
+if args.device == 'all':
+    devices = ['cpu', 'cuda']
+else:
+    devices = [args.device]
 
 # Build benchmark jobs: (script_path, model_name, device)
 jobs = []
@@ -29,6 +41,8 @@ for script_path in pytorch_scripts:
     script_name = os.path.basename(script_path)
     if script_name in script_model_map:
         models = script_model_map[script_name]
+        if args.skip_quant:
+            models = [m for m in models if not m.endswith('_quant')]
         for model in models:
             for device in devices:
                 jobs.append((script_path, model, device))
@@ -38,8 +52,9 @@ for script_path in pytorch_scripts:
             base = script_name[:-len('_benchmark.py')]
             jobs.append((script_path, base, 'cpu'))
             jobs.append((script_path, base, 'cuda'))
-            jobs.append((script_path, base + '_quant', 'cpu'))
-            jobs.append((script_path, base + '_quant', 'cuda'))
+            if not args.skip_quant:
+                jobs.append((script_path, base + '_quant', 'cpu'))
+                jobs.append((script_path, base + '_quant', 'cuda'))
 
 # Count total benchmarks
 total_benchmarks = len(jobs)
@@ -68,4 +83,4 @@ for script_path, model, device in jobs:
 
 print("\n" + "=" * 80)
 print(f"PyTorch benchmarks completed: {completed_benchmarks}/{total_benchmarks}")
-print("Results saved to: /home/ethanwst/FPGA-Accelerator/cnn_benchmarking/benchmark_results/benchmark_results.csv")
+print("Results saved to: /home/ethanwst/FPGA-Accelerator/cnn_benchmarking/benchmark_results/pytorch_benchmark_results.csv")

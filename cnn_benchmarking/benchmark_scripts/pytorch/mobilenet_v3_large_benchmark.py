@@ -33,7 +33,7 @@ print(f"Running on: {device}")
 
 if args.model == 'mobilenet_v3_large_quant':
     weights = MobileNet_V3_Large_QuantizedWeights.DEFAULT
-    model = models.quantization.mobilenet_v3_large(weights=weights, quantize=True)
+    model = models.quantization.mobilenet_v3_large(quantize=True, weights=weights)
 elif args.model == 'mobilenet_v3_large':
     weights = MobileNet_V3_Large_Weights.DEFAULT
     model = models.mobilenet_v3_large(weights=weights)
@@ -124,7 +124,7 @@ print(f"Top-1 Accuracy: {accuracy:.2f}%")
 print(f"Top-5 Accuracy: {top5_accuracy:.2f}%")
 print(f"Total size in MB: {total_size_mb:.2f}")
 
-csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../benchmark_results/benchmark_results.csv'))
+csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../benchmark_results/pytorch_benchmark_results.csv'))
 write_header = not os.path.exists(csv_path)
 with open(csv_path, mode="a", newline="") as file:
     writer = csv.writer(file)

@@ -33,7 +33,7 @@ print(f"Running on: {device}")
 
 if args.model == 'resnet50_quant':
     weights = ResNet50_QuantizedWeights.DEFAULT
-    model = models.quantization.resnet50(weights=weights, quantize=True)
+    model = models.quantization.resnet50(quantize=True, weights=weights)
 elif args.model == 'resnet50':
     weights = ResNet50_Weights.DEFAULT
     model = models.resnet50(weights=weights)
@@ -124,7 +124,7 @@ print(f"Top-1 Accuracy: {accuracy:.2f}%")
 print(f"Top-5 Accuracy: {top5_accuracy:.2f}%")
 print(f"Total size in MB: {total_size_mb:.2f}")
 
-csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../benchmark_results/benchmark_results.csv'))
+csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../benchmark_results/pytorch_benchmark_results.csv'))
 write_header = not os.path.exists(csv_path)
 with open(csv_path, mode="a", newline="") as file:
     writer = csv.writer(file)
