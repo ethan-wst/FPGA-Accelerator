@@ -188,7 +188,7 @@ print(f"Model Size: {model_size_mb:.2f} MB")
 
 # --- Data Export ---
 csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 
-                                      '../../benchmark_results/onnx_local_benchmark_results.csv'))
+                                      '../../benchmark_results/onnx_benchmark_results.csv'))
 write_header = not os.path.exists(csv_path)
 
 with open(csv_path, mode="a", newline="") as file:
